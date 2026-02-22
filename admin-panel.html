@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — EREN ADIGÜZEL</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --surface: #111; --surface2: #191919;
+    --border: #222; --accent: #c8a96e; --accent2: #ff4757;
+    --text: #f0f0f0; --muted: #555; --muted2: #888; --sidebar: 240px;
+  }
+  html { font-size: 14px; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; }
+
+  .sidebar {
+    width: var(--sidebar); min-height: 100vh; background: var(--surface);
+    border-right: 1px solid var(--border); display: flex; flex-direction: column;
+    position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;
+  }
+  .sidebar-brand { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-brand span { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--accent); }
+  .sidebar-brand small { display: block; font-size: 10px; color: var(--muted2); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .sidebar-nav { flex: 1; padding: 16px 0; }
+  .nav-label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; padding: 12px 24px 6px; font-family: 'JetBrains Mono', monospace; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; cursor: pointer; color: var(--muted2); font-size: 13px; border-left: 2px solid transparent; transition: all 0.15s; user-select: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(200,169,110,0.05); }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); }
+  .sidebar-footer a { color: var(--accent); text-decoration: none; }
+
+  .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+  .topbar-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .badge { background: rgba(200,169,110,0.12); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(200,169,110,0.2); }
+  .content { flex: 1; padding: 32px; }
+
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+
+  .section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .section-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; }
+  .section-header p { font-size: 12px; color: var(--muted2); margin-top: 4px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #b8994e; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--muted2); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: #444; }
+  .btn-danger { background: rgba(255,71,87,0.1); color: var(--accent2); border: 1px solid rgba(255,71,87,0.2); }
+  .btn-danger:hover { background: rgba(255,71,87,0.2); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+  .card-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-grid.full { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.span2 { grid-column: span 2; }
+
+  label { font-size: 11px; color: var(--muted2); letter-spacing: 0.5px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+  input, textarea, select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif; width: 100%; transition: border-color 0.15s; outline: none; appearance: none; }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,169,110,0.08); }
+  textarea { resize: vertical; min-height: 90px; }
+
+  .upload-zone { border: 2px dashed var(--border); border-radius: 8px; padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg); position: relative; }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent); background: rgba(200,169,110,0.03); }
+  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 32px; margin-bottom: 10px; }
+  .upload-text { font-size: 13px; color: var(--muted2); }
+  .upload-text strong { color: var(--accent); }
+  .upload-meta { font-size: 11px; color: var(--muted); margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+  .image-preview { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .preview-item { position: relative; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+  .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+  .preview-item .remove-img { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.8); color: var(--accent2); border: none; cursor: pointer; width: 20px; height: 20px; border-radius: 50%; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+
+  .items-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .item-row { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; transition: border-color 0.15s; animation: slideIn 0.2s ease; }
+  .item-row:hover { border-color: #333; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .item-thumb { width: 44px; height: 44px; border-radius: 6px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; overflow: hidden; }
+  .item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .item-info { flex: 1; min-width: 0; }
+  .item-name { font-weight: 500; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-meta { font-size: 11px; color: var(--muted2); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+  .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .stat-label { font-size: 10px; color: var(--muted2); text-transform: uppercase; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 38px; letter-spacing: 1px; color: var(--accent); line-height: 1; margin-top: 8px; }
+
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+  .toast { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 12px 18px; border-radius: 8px; font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 10px; animation: toastIn 0.25s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.5); min-width: 240px; }
+  .toast.error { border-left-color: var(--accent2); }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; width: 480px; max-width: 95vw; animation: modalIn 0.2s ease; }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; margin-bottom: 6px; }
+  .modal-body { margin: 20px 0; font-size: 13px; color: var(--muted2); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  .export-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7dff8a; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .tag { display: inline-flex; align-items: center; background: rgba(200,169,110,0.08); color: var(--accent); border: 1px solid rgba(200,169,110,0.15); border-radius: 4px; padding: 2px 8px; font-size: 10px; font-family: 'JetBrains Mono', monospace; }
+  .tag.red { background: rgba(255,71,87,0.08); color: var(--accent2); border-color: rgba(255,71,87,0.15); }
+  .search-bar { position: relative; margin-bottom: 16px; }
+  .search-bar input { padding-left: 36px; }
+  .search-bar::before { content: '⌕'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; z-index: 1; pointer-events: none; }
+
+  .sync-banner { background: rgba(200,169,110,0.08); border: 1px solid rgba(200,169,110,0.2); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted2); }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; flex-shrink: 0; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid .span2 { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span>EREN ADMIN</span>
+    <small>Site Yönetim Paneli</small>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Genel</div>
+    <div class="nav-item active" onclick="switchTab('dashboard')"><span class="icon">◈</span> Dashboard</div>
+    <div class="nav-label">İçerik</div>
+    <div class="nav-item" onclick="switchTab('songs')"><span class="icon">♪</span> Şarkılar</div>
+    <div class="nav-item" onclick="switchTab('books')"><span class="icon">◫</span> Kitaplar</div>
+    <div class="nav-item" onclick="switchTab('gallery')"><span class="icon">⬡</span> Galeri</div>
+    <div class="nav-item" onclick="switchTab('quotes')"><span class="icon">❝</span> Sözler</div>
+    <div class="nav-label">Araçlar</div>
+    <div class="nav-item" onclick="switchTab('export')"><span class="icon">↗</span> Dışa Aktar</div>
+  </nav>
+  <div class="sidebar-footer">
+    Site: <a href="https://erenoizmm.github.io/erenx/" target="_blank">erenx ↗</a>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div style="display:flex;gap:12px;align-items:center">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <span class="topbar-title" id="topbarTitle">DASHBOARD</span>
+    </div>
+    <div class="topbar-actions">
+      <span class="badge" id="syncStatus">🔄 Senkronize</span>
+      <button class="btn btn-primary btn-sm" onclick="syncToSite()">💾 Siteye Kaydet</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <section class="tab-section active" id="tab-dashboard">
+      <div class="sync-banner">
+        <div class="sync-dot"></div>
+        <div>
+          <strong style="color:var(--text)">Canlı Bağlantı Aktif</strong> — 
+          Admin panelinde yaptığın değişiklikler, <strong style="color:var(--accent)">"Siteye Kaydet"</strong> butonuna basınca anında sitenin tüm bölümlerine yansır.
+          <br><small style="font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:4px;display:block">Site ve Admin aynı tarayıcıda açıksa anlık güncelleme çalışır.</small>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Şarkı</div><div class="stat-value" id="stat-songs">0</div></div>
+        <div class="stat-card"><div class="stat-label">Kitap</div><div class="stat-value" id="stat-books">0</div></div>
+        <div class="stat-card"><div class="stat-label">Fotoğraf</div><div class="stat-value" id="stat-gallery">0</div></div>
+        <div class="stat-card"><div class="stat-label">Söz</div><div class="stat-value" id="stat-quotes">0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚡ Hızlı Erişim</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="switchTab('songs')">♪ Şarkı Ekle</button>
+          <button class="btn btn-ghost" onclick="switchTab('books')">◫ Kitap Ekle</button>
+          <button class="btn btn-ghost" onclick="switchTab('gallery')">⬡ Fotoğraf Yükle</button>
+          <button class="btn btn-ghost" onclick="switchTab('quotes')">❝ Söz Ekle</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">ℹ Nasıl Çalışır?</div>
+        <div style="color:var(--muted2);font-size:13px;line-height:1.9">
+          1. İstediğin bölüme git ve içerik ekle/düzenle<br>
+          2. <strong style="color:var(--accent)">Siteye Kaydet</strong> butonuna bas<br>
+          3. <a href="https://erenoizmm.github.io/erenx/" target="_blank" style="color:var(--accent)">Sitenizi aç ↗</a> — içerikler otomatik yüklenmiş olacak<br>
+          <br>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px">⚠ Admin paneli ve site aynı domain'de çalışmıyorsa "Dışa Aktar" bölümünden JSON kodunu kopyalayıp index.html'e yapıştır.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ŞARKILAR -->
+    <section class="tab-section" id="tab-songs">
+      <div class="section-header">
+        <div><h2>Şarkılar</h2><p>Favori şarkıları ekle ve düzenle</p></div>
+        <button class="btn btn-primary" onclick="openAddSong()">+ Şarkı Ekle</button>
+      </div>
+      <div class="card" id="song-form-card" style="display:none">
+        <div class="card-title" id="song-form-title">Yeni Şarkı</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Şarkı Adı *</label>
+            <input type="text" id="s-name" placeholder="ör: Gecenin Ötesi">
+          </div>
+          <div class="form-group">
+            <label>Sanatçı *</label>
+            <input type="text" id="s-artist" placeholder="ör: Teoman">
+          </div>
+          <div class="form-group">
+            <label>Albüm</label>
+            <input type="text" id="s-album" placeholder="ör: Teoman">
+          </div>
+          <div class="form-group">
+            <label>Yıl</label>
+            <input type="text" id="s-year" placeholder="ör: 1997">
+          </div>
+          <div class="form-group span2">
+            <label>YouTube / Spotify Linki</label>
+            <input type="url" id="s-link" placeholder="https://open.spotify.com/...">
+          </div>
+          <div class="form-group">
+            <label>Kapak Görseli URL</label>
+            <input type="url" id="s-cover" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Kategori</label>
+            <select id="s-cat">
+              <option value="favori">Favori</option>
+              <option value="günlük">Günlük</option>
+              <option value="nostalji">Nostalji</option>
+              <option value="keşif">Keşif</option>
+            </select>
+          </div>
+          <div class="form-group span2">
+            <label>Not / Açıklama</label>
+            <textarea id="s-note" placeholder="Bu şarkı hakkında..."></textarea>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="saveSong()">Ekle</button>
+          <button class="btn btn-ghost" onclick="closeSongForm()">İptal</button>
+        </div>
+      </div>
+      <div class="search-bar"><input type="text" placeholder="Şarkı ara..." oninput="renderSongs(this.value)"></div>
+      <div class="items-list" id="songs-list"></div>
+      <p id="songs-empty" style="color:var(--muted2);font-size:13px;text-align:center;padding:40px">Henüz şarkı eklenmedi</p>
+    </section>
+
+    <!-- KİTAPLAR -->
+    <section class="tab-section" id="tab-books">
+      <div class="section-header">
+        <div><h2>Kitaplar</h2><p>Okuma listeni yönet</p></div>
+        <button class="btn btn-primary" onclick="openAddBook()">+ Kitap Ekle</button>
+      </div>
+      <div class="card" id="book-form-card" style="display:none">
+        <div class="card-title" id="book-form-title">Yeni Kitap</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Kitap Adı *</label>
+            <input type="text" id="b-name" placeholder="ör: Suç ve Ceza">
+          </div>
+          <div class="form-group">
+            <label>Yazar *</label>
+            <input type="text" id="b-author" placeholder="ör: Dostoyevski">
+          </div>
+          <div class="form-group">
+            <label>Yayın Yılı</label>
+            <input type="text" id="b-year" placeholder="ör: 1866">
+          </div>
+          <div class="form-group">
+            <label>Durum</label>
+            <select id="b-status">
+              <option value="okundu">✅ Okundu</option>
+              <option value="okunuyor">📖 Okunuyor</option>
+              <option value="listede">📌 Listede</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Kapak Görseli URL</label>
+            <input type="url" id="b-cover" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Puan (1–10)</label>
+            <input type="number" id="b-rating" placeholder="8" min="1" max="10">
+          </div>
+          <div class="form-group span2">
+            <label>Yorum</label>
+            <textarea id="b-note" placeholder="Bu kitap hakkında düşüncelerim..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Tür</label>
+            <input type="text" id="b-genre" placeholder="ör: Roman, Felsefe">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-group">
+          <label>ya da Kapak Yükle (dosya)</label>
+          <div class="upload-zone">
+            <input type="file" accept="image/*" onchange="handleBookCover(this)">
+            <div class="upload-icon">📚</div>
+            <div class="upload-text">Dosya seç veya sürükle — <strong>JPG/PNG/WEBP</strong></div>
+          </div>
+          <div id="book-cover-preview" class="image-preview"></div>
+        </div>
+        <div class="divider"></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="saveBook()">Ekle</button>
+          <button class="btn btn-ghost" onclick="closeBookForm()">İptal</button>
+        </div>
+      </div>
+      <div class="search-bar"><input type="text" placeholder="Kitap ara..." oninput="renderBooks(this.value)"></div>
+      <div class="items-list" id="books-list"></div>
+      <p id="books-empty" style="color:var(--muted2);font-size:13px;text-align:center;padding:40px">Henüz kitap eklenmedi</p>
+    </section>
+
+    <!-- GALERİ -->
+    <section class="tab-section" id="tab-gallery">
+      <div class="section-header">
+        <div><h2>Galeri</h2><p>Fotoğrafları yönet</p></div>
+        <button class="btn btn-primary" onclick="document.getElementById('gallery-input').click()">+ Fotoğraf Yükle</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Fotoğraf Yükle</div>
+        <div class="upload-zone" id="gallery-zone">
+          <input type="file" id="gallery-input" accept="image/*" multiple onchange="handleGalleryUpload(this)">
+          <div class="upload-icon">⬡</div>
+          <div class="upload-text">Birden fazla fotoğraf seç veya sürükle & bırak</div>
+          <div class="upload-meta">JPG, PNG, WEBP — Çoklu seçim desteklenir</div>
+        </div>
+      </div>
+      <div id="gallery-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px"></div>
+      <p id="gallery-empty" style="color:var(--muted2);font-size:13px;text-align:center;padding:40px">Henüz fotoğraf eklenmedi</p>
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">URL ile Ekle</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Görsel URL</label>
+            <input type="url" id="g-url" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Başlık</label>
+            <input type="text" id="g-title" placeholder="ör: Yaz 2024">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <button class="btn btn-primary" onclick="addGalleryUrl()">Ekle</button>
+      </div>
+    </section>
+
+    <!-- SÖZLER -->
+    <section class="tab-section" id="tab-quotes">
+      <div class="section-header">
+        <div><h2>Sözler</h2><p>Alıntı ve sözleri düzenle</p></div>
+        <button class="btn btn-primary" onclick="openAddQuote()">+ Söz Ekle</button>
+      </div>
+      <div class="card" id="quote-form-card" style="display:none">
+        <div class="card-title" id="quote-form-title">Yeni Söz</div>
+        <div class="form-grid full">
+          <div class="form-group">
+            <label>Söz *</label>
+            <textarea id="q-text" style="min-height:120px" placeholder="Buraya sözü yaz..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Kaynak</label>
+            <input type="text" id="q-source" placeholder="ör: Albert Camus — Yabancı">
+          </div>
+          <div class="form-group">
+            <label>Kategori</label>
+            <select id="q-cat">
+              <option value="genel">Genel</option>
+              <option value="kitap">Kitap</option>
+              <option value="film">Film / Dizi</option>
+              <option value="muzik">Müzik</option>
+              <option value="kisisel">Kişisel</option>
+            </select>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="saveQuote()">Ekle</button>
+          <button class="btn btn-ghost" onclick="closeQuoteForm()">İptal</button>
+        </div>
+      </div>
+      <div class="search-bar"><input type="text" placeholder="Söz ara..." oninput="renderQuotes(this.value)"></div>
+      <div class="items-list" id="quotes-list"></div>
+      <p id="quotes-empty" style="color:var(--muted2);font-size:13px;text-align:center;padding:40px">Henüz söz eklenmedi</p>
+    </section>
+
+    <!-- DIŞA AKTAR -->
+    <section class="tab-section" id="tab-export">
+      <div class="section-header">
+        <div><h2>Dışa Aktar</h2><p>JSON verisini site koduna göm</p></div>
+        <button class="btn btn-primary" onclick="copyExport()">📋 Kopyala</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Tüm Veri — JSON</div>
+        <div class="export-box" id="export-box">Henüz içerik eklenmedi.</div>
+        <div class="divider"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="downloadJSON()">⬇ İndir (.json)</button>
+          <button class="btn btn-ghost" onclick="loadSampleData()">★ Örnek Veri Yükle</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">ℹ GitHub Pages için Talimat</div>
+        <div style="color:var(--muted2);font-size:13px;line-height:1.9">
+          1. "Tüm Veri — JSON" bölümündeki kodu kopyala<br>
+          2. <code style="background:var(--bg);padding:2px 6px;border-radius:4px;color:var(--accent)">index.html</code> dosyasını aç<br>
+          3. <code style="background:var(--bg);padding:2px 6px;border-radius:4px;color:var(--accent)">const SITE_DATA = { ... }</code> satırını bul ve içeriği yapıştır<br>
+          4. Kaydet & push et
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚙ Veri İçe Aktar</div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label>JSON Yapıştır</label>
+          <textarea id="import-json" placeholder='{"songs":[],"books":[],...}' style="min-height:100px;font-family:JetBrains Mono,monospace;font-size:11px"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="importJSON()">İçe Aktar</button>
+      </div>
+      <div class="card">
+        <div class="card-title">⚠ Tehlikeli Alan</div>
+        <p style="color:var(--muted2);font-size:13px;margin-bottom:16px">Tüm içerikleri silmek geri alınamaz.</p>
+        <button class="btn btn-danger" onclick="confirmClearAll()">🗑 Tüm Veriyi Sil</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Emin misin?</div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Vazgeç</button>
+      <button class="btn btn-danger" id="modal-confirm">Evet, Sil</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// STORAGE KEY — site ile aynı key kullanılıyor
+// ══════════════════════════════════════════════
+const STORAGE_KEY = 'erenx_site_data';
+
+let data = { songs: [], books: [], gallery: [], quotes: [] };
+let editingId = { songs: null, books: null, quotes: null };
+
+function loadData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try { data = JSON.parse(saved); } catch(e) {}
+  }
+  refreshAll();
+}
+
+// Ana kaydetme fonksiyonu — localStorage'a yazar, site okur
+function syncToSite() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  // StorageEvent tetikle — aynı origin'de açık sekmelere bildir
+  window.dispatchEvent(new StorageEvent('storage', {
+    key: STORAGE_KEY,
+    newValue: JSON.stringify(data),
+    storageArea: localStorage
+  }));
+  document.getElementById('syncStatus').textContent = '✓ Kaydedildi';
+  setTimeout(() => document.getElementById('syncStatus').textContent = '🔄 Senkronize', 2000);
+  toast('Veriler siteye kaydedildi ✓');
+  updateStats();
+  updateExport();
+}
+
+// ══════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════
+const tabTitles = { dashboard:'DASHBOARD', songs:'ŞARKILAR', books:'KİTAPLAR', gallery:'GALERİ', quotes:'SÖZLER', export:'DIŞA AKTAR' };
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.currentTarget.classList.add('active');
+  document.getElementById('topbarTitle').textContent = tabTitles[tab];
+  if (tab === 'export') updateExport();
+}
+
+// ══════════════════════════════════════════════
+// SONGS
+// ══════════════════════════════════════════════
+function openAddSong() {
+  editingId.songs = null;
+  document.getElementById('song-form-title').textContent = 'Yeni Şarkı';
+  ['s-name','s-artist','s-album','s-year','s-link','s-note','s-cover'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('song-form-card').style.display = 'block';
+  document.getElementById('s-name').focus();
+}
+function closeSongForm() { document.getElementById('song-form-card').style.display = 'none'; }
+
+function saveSong() {
+  const name = document.getElementById('s-name').value.trim();
+  const artist = document.getElementById('s-artist').value.trim();
+  if (!name || !artist) { toast('Şarkı adı ve sanatçı zorunlu', 'error'); return; }
+  const song = {
+    id: editingId.songs || Date.now(),
+    name, artist,
+    album: document.getElementById('s-album').value.trim(),
+    year: document.getElementById('s-year').value.trim(),
+    link: document.getElementById('s-link').value.trim(),
+    note: document.getElementById('s-note').value.trim(),
+    cover: document.getElementById('s-cover').value.trim(),
+    category: document.getElementById('s-cat').value
+  };
+  if (editingId.songs) {
+    const idx = data.songs.findIndex(s => s.id === editingId.songs);
+    if (idx >= 0) data.songs[idx] = song;
+    toast('Şarkı güncellendi ✓');
+  } else {
+    data.songs.unshift(song);
+    toast('Şarkı eklendi ✓');
+  }
+  closeSongForm(); syncToSite(); renderSongs();
+}
+
+function renderSongs(filter = '') {
+  const list = document.getElementById('songs-list');
+  const empty = document.getElementById('songs-empty');
+  const filtered = data.songs.filter(s =>
+    s.name.toLowerCase().includes(filter.toLowerCase()) ||
+    s.artist.toLowerCase().includes(filter.toLowerCase())
+  );
+  list.innerHTML = '';
+  empty.style.display = filtered.length ? 'none' : 'block';
+  filtered.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="item-thumb">${s.cover ? `<img src="${s.cover}" onerror="this.style.display='none'">` : '♪'}</div>
+      <div class="item-info">
+        <div class="item-name">${s.name}</div>
+        <div class="item-meta">${s.artist}${s.album?' · '+s.album:''}${s.year?' · '+s.year:''}</div>
+      </div>
+      <span class="tag">${s.category}</span>
+      ${s.link?`<a href="${s.link}" target="_blank" class="btn btn-ghost btn-sm">↗</a>`:''}
+      <div class="item-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editSong(${s.id})">✎</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})">✕</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function editSong(id) {
+  const s = data.songs.find(x => x.id === id); if(!s) return;
+  editingId.songs = id;
+  document.getElementById('s-name').value = s.name;
+  document.getElementById('s-artist').value = s.artist;
+  document.getElementById('s-album').value = s.album||'';
+  document.getElementById('s-year').value = s.year||'';
+  document.getElementById('s-link').value = s.link||'';
+  document.getElementById('s-note').value = s.note||'';
+  document.getElementById('s-cover').value = s.cover||'';
+  document.getElementById('s-cat').value = s.category||'favori';
+  document.getElementById('song-form-title').textContent = 'Şarkıyı Düzenle';
+  document.getElementById('song-form-card').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deleteSong(id) {
+  showModal('Şarkıyı Sil', 'Bu şarkıyı kaldırmak istiyor musun?', () => {
+    data.songs = data.songs.filter(s => s.id !== id);
+    syncToSite(); renderSongs(); toast('Şarkı silindi');
+  });
+}
+
+// ══════════════════════════════════════════════
+// BOOKS
+// ══════════════════════════════════════════════
+function openAddBook() {
+  editingId.books = null;
+  document.getElementById('book-form-title').textContent = 'Yeni Kitap';
+  ['b-name','b-author','b-year','b-cover','b-rating','b-note','b-genre'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('book-cover-preview').innerHTML = '';
+  document.getElementById('book-form-card').style.display = 'block';
+  document.getElementById('b-name').focus();
+}
+function closeBookForm() { document.getElementById('book-form-card').style.display = 'none'; }
+
+function handleBookCover(input) {
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('b-cover').value = e.target.result;
+    document.getElementById('book-cover-preview').innerHTML = `<div class="preview-item"><img src="${e.target.result}"><button class="remove-img" onclick="document.getElementById('b-cover').value='';document.getElementById('book-cover-preview').innerHTML=''">✕</button></div>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveBook() {
+  const name = document.getElementById('b-name').value.trim();
+  const author = document.getElementById('b-author').value.trim();
+  if (!name || !author) { toast('Kitap adı ve yazar zorunlu', 'error'); return; }
+  const book = {
+    id: editingId.books || Date.now(),
+    name, author,
+    year: document.getElementById('b-year').value.trim(),
+    status: document.getElementById('b-status').value,
+    cover: document.getElementById('b-cover').value.trim(),
+    rating: document.getElementById('b-rating').value,
+    note: document.getElementById('b-note').value.trim(),
+    genre: document.getElementById('b-genre').value.trim()
+  };
+  if (editingId.books) {
+    const idx = data.books.findIndex(b => b.id === editingId.books);
+    if (idx >= 0) data.books[idx] = book;
+    toast('Kitap güncellendi ✓');
+  } else {
+    data.books.unshift(book);
+    toast('Kitap eklendi ✓');
+  }
+  closeBookForm(); syncToSite(); renderBooks();
+}
+
+function renderBooks(filter = '') {
+  const list = document.getElementById('books-list');
+  const empty = document.getElementById('books-empty');
+  const filtered = data.books.filter(b =>
+    b.name.toLowerCase().includes(filter.toLowerCase()) ||
+    b.author.toLowerCase().includes(filter.toLowerCase())
+  );
+  list.innerHTML = '';
+  empty.style.display = filtered.length ? 'none' : 'block';
+  const statusLabel = { okundu:'✅ Okundu', okunuyor:'📖 Okunuyor', listede:'📌 Listede' };
+  filtered.forEach(b => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="item-thumb">${b.cover?`<img src="${b.cover}" onerror="this.style.display='none'">` :'◫'}</div>
+      <div class="item-info">
+        <div class="item-name">${b.name}</div>
+        <div class="item-meta">${b.author}${b.year?' · '+b.year:''}${b.rating?' · ★'+b.rating:''}</div>
+      </div>
+      <span class="tag">${statusLabel[b.status]||b.status}</span>
+      ${b.genre?`<span class="tag red">${b.genre}</span>`:''}
+      <div class="item-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editBook(${b.id})">✎</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteBook(${b.id})">✕</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function editBook(id) {
+  const b = data.books.find(x => x.id === id); if(!b) return;
+  editingId.books = id;
+  document.getElementById('b-name').value = b.name;
+  document.getElementById('b-author').value = b.author;
+  document.getElementById('b-year').value = b.year||'';
+  document.getElementById('b-status').value = b.status;
+  document.getElementById('b-cover').value = b.cover||'';
+  document.getElementById('b-rating').value = b.rating||'';
+  document.getElementById('b-note').value = b.note||'';
+  document.getElementById('b-genre').value = b.genre||'';
+  document.getElementById('book-form-title').textContent = 'Kitabı Düzenle';
+  document.getElementById('book-cover-preview').innerHTML = b.cover ? `<div class="preview-item"><img src="${b.cover}"></div>` : '';
+  document.getElementById('book-form-card').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deleteBook(id) {
+  showModal('Kitabı Sil', 'Bu kitabı kaldırmak istiyor musun?', () => {
+    data.books = data.books.filter(b => b.id !== id);
+    syncToSite(); renderBooks(); toast('Kitap silindi');
+  });
+}
+
+// ══════════════════════════════════════════════
+// GALLERY
+// ══════════════════════════════════════════════
+function handleGalleryUpload(input) {
+  const files = Array.from(input.files);
+  let done = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      data.gallery.push({ id: Date.now() + Math.random(), src: e.target.result, title: file.name.replace(/\.[^.]+$/,''), type:'upload' });
+      done++;
+      if (done === files.length) { syncToSite(); renderGallery(); toast(`${files.length} fotoğraf eklendi ✓`); }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function addGalleryUrl() {
+  const url = document.getElementById('g-url').value.trim();
+  const title = document.getElementById('g-title').value.trim();
+  if (!url) { toast('URL zorunlu','error'); return; }
+  data.gallery.push({ id: Date.now(), src: url, title: title||'Fotoğraf', type:'url' });
+  document.getElementById('g-url').value = '';
+  document.getElementById('g-title').value = '';
+  syncToSite(); renderGallery(); toast('Fotoğraf eklendi ✓');
+}
+
+function renderGallery() {
+  const grid = document.getElementById('gallery-grid');
+  const empty = document.getElementById('gallery-empty');
+  grid.innerHTML = '';
+  empty.style.display = data.gallery.length ? 'none' : 'block';
+  data.gallery.forEach(img => {
+    const item = document.createElement('div');
+    item.style.cssText = 'position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--surface2);aspect-ratio:1;animation:slideIn 0.2s ease';
+    item.innerHTML = `
+      <img src="${img.src}" style="width:100%;height:100%;object-fit:cover">
+      <div style="position:absolute;inset:0;background:linear-gradient(transparent,rgba(0,0,0,0.8));opacity:0;transition:0.2s;display:flex;flex-direction:column;justify-content:flex-end;padding:10px" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0">
+        <div style="font-size:11px;color:#fff">${img.title}</div>
+        <button onclick="deleteGallery('${img.id}')" style="margin-top:6px;background:rgba(255,71,87,0.8);color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:10px;cursor:pointer">Sil</button>
+      </div>`;
+    grid.appendChild(item);
+  });
+}
+
+function deleteGallery(id) {
+  data.gallery = data.gallery.filter(g => String(g.id) !== String(id));
+  syncToSite(); renderGallery(); toast('Fotoğraf silindi');
+}
+
+// Drag & Drop
+const gz = document.getElementById('gallery-zone');
+gz.addEventListener('dragover', e => { e.preventDefault(); gz.classList.add('drag-over'); });
+gz.addEventListener('dragleave', () => gz.classList.remove('drag-over'));
+gz.addEventListener('drop', e => { e.preventDefault(); gz.classList.remove('drag-over'); handleGalleryUpload({files: e.dataTransfer.files}); });
+
+// ══════════════════════════════════════════════
+// QUOTES
+// ══════════════════════════════════════════════
+function openAddQuote() {
+  editingId.quotes = null;
+  document.getElementById('quote-form-title').textContent = 'Yeni Söz';
+  ['q-text','q-source'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('quote-form-card').style.display = 'block';
+  document.getElementById('q-text').focus();
+}
+function closeQuoteForm() { document.getElementById('quote-form-card').style.display = 'none'; }
+
+function saveQuote() {
+  const text = document.getElementById('q-text').value.trim();
+  if (!text) { toast('Söz zorunlu','error'); return; }
+  const quote = {
+    id: editingId.quotes || Date.now(),
+    text,
+    source: document.getElementById('q-source').value.trim(),
+    category: document.getElementById('q-cat').value
+  };
+  if (editingId.quotes) {
+    const idx = data.quotes.findIndex(q => q.id === editingId.quotes);
+    if (idx >= 0) data.quotes[idx] = quote;
+    toast('Söz güncellendi ✓');
+  } else {
+    data.quotes.unshift(quote);
+    toast('Söz eklendi ✓');
+  }
+  closeQuoteForm(); syncToSite(); renderQuotes();
+}
+
+function renderQuotes(filter = '') {
+  const list = document.getElementById('quotes-list');
+  const empty = document.getElementById('quotes-empty');
+  const filtered = data.quotes.filter(q =>
+    q.text.toLowerCase().includes(filter.toLowerCase()) ||
+    (q.source||'').toLowerCase().includes(filter.toLowerCase())
+  );
+  list.innerHTML = '';
+  empty.style.display = filtered.length ? 'none' : 'block';
+  filtered.forEach(q => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.style.alignItems = 'flex-start';
+    row.innerHTML = `
+      <div class="item-thumb" style="font-size:20px;align-self:center">❝</div>
+      <div class="item-info">
+        <div style="font-size:13px;line-height:1.5">${q.text.length>120?q.text.slice(0,120)+'…':q.text}</div>
+        <div class="item-meta" style="margin-top:4px">${q.source?'— '+q.source:'Anonim'} · ${q.category}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editQuote(${q.id})">✎</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteQuote(${q.id})">✕</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function editQuote(id) {
+  const q = data.quotes.find(x => x.id === id); if(!q) return;
+  editingId.quotes = id;
+  document.getElementById('q-text').value = q.text;
+  document.getElementById('q-source').value = q.source||'';
+  document.getElementById('q-cat').value = q.category||'genel';
+  document.getElementById('quote-form-title').textContent = 'Sözü Düzenle';
+  document.getElementById('quote-form-card').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deleteQuote(id) {
+  showModal('Sözü Sil', 'Bu sözü silmek istiyor musun?', () => {
+    data.quotes = data.quotes.filter(q => q.id !== id);
+    syncToSite(); renderQuotes(); toast('Söz silindi');
+  });
+}
+
+// ══════════════════════════════════════════════
+// EXPORT / IMPORT
+// ══════════════════════════════════════════════
+function updateExport() {
+  const exportData = {
+    songs: data.songs,
+    books: data.books,
+    gallery: data.gallery.map(g => ({
+      id: g.id, title: g.title, type: g.type,
+      src: g.src.startsWith('data:') ? '[base64 — dosya yüklendi]' : g.src
+    })),
+    quotes: data.quotes
+  };
+  document.getElementById('export-box').textContent = JSON.stringify(exportData, null, 2);
+}
+
+function copyExport() {
+  updateExport();
+  const fullData = JSON.stringify(data, null, 2);
+  navigator.clipboard.writeText(fullData).then(() => toast('Kopyalandı ✓')).catch(() => toast('Kopyalama başarısız','error'));
+}
+
+function downloadJSON() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'erenx-data.json'; a.click();
+  URL.revokeObjectURL(url);
+  toast('İndirildi ✓');
+}
+
+function importJSON() {
+  try {
+    const raw = document.getElementById('import-json').value.trim();
+    if (!raw) return;
+    const imported = JSON.parse(raw);
+    if (imported.songs) data.songs = imported.songs;
+    if (imported.books) data.books = imported.books;
+    if (imported.gallery) data.gallery = imported.gallery;
+    if (imported.quotes) data.quotes = imported.quotes;
+    syncToSite(); refreshAll(); toast('Veri içe aktarıldı ✓');
+    document.getElementById('import-json').value = '';
+  } catch(e) { toast('Geçersiz JSON','error'); }
+}
+
+function loadSampleData() {
+  data.songs = [
+    { id:1, name:'Gecenin Ötesi', artist:'Teoman', album:'Teoman', year:'1997', category:'favori', link:'', note:'', cover:'' },
+    { id:2, name:'Ağlama', artist:'Duman', album:'Duman', year:'2000', category:'nostalji', link:'', note:'', cover:'' }
+  ];
+  data.books = [
+    { id:1, name:'Suç ve Ceza', author:'Fyodor Dostoyevski', year:'1866', status:'okundu', rating:'10', genre:'Roman', note:'Olağanüstü', cover:'' }
+  ];
+  data.quotes = [
+    { id:1, text:'İnsan yıldızlara bakmayı bıraktığı gün yaşlı olur.', source:'', category:'genel' }
+  ];
+  syncToSite(); refreshAll(); toast('Örnek veri yüklendi ✓');
+}
+
+function confirmClearAll() {
+  showModal('Tüm Veriyi Sil', 'Bütün içerikler silinecek. Bu işlem geri alınamaz!', () => {
+    data = { songs:[], books:[], gallery:[], quotes:[] };
+    syncToSite(); refreshAll(); toast('Tüm veri silindi');
+  });
+}
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+function updateStats() {
+  document.getElementById('stat-songs').textContent = data.songs.length;
+  document.getElementById('stat-books').textContent = data.books.length;
+  document.getElementById('stat-gallery').textContent = data.gallery.length;
+  document.getElementById('stat-quotes').textContent = data.quotes.length;
+}
+
+function refreshAll() {
+  renderSongs(); renderBooks(); renderGallery(); renderQuotes();
+  updateStats(); updateExport();
+}
+
+function toast(msg, type='success') {
+  const t = document.createElement('div');
+  t.className = 'toast' + (type==='error'?' error':'');
+  t.innerHTML = `<span>${type==='error'?'⚠':'✓'}</span> ${msg}`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => { t.style.cssText += 'opacity:0;transform:translateX(20px);transition:0.3s'; setTimeout(()=>t.remove(),300); }, 2500);
+}
+
+function showModal(title, body, cb) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').textContent = body;
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('modal-confirm').onclick = () => { closeModal(); cb && cb(); };
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+loadData();
+</script>
+</body>
+</html>
