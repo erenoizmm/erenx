@@ -1,0 +1,202 @@
+<!-- 
+╔══════════════════════════════════════════════════════════════╗
+║  ADMIN PANELİ ENTEGRASYON KODU                              ║
+║  Bu script bloğunu index.html'de </body> kapanmadan önce    ║
+║  ekle. Admin panelindeki tüm içerikler buraya yüklenir.     ║
+╚══════════════════════════════════════════════════════════════╝
+-->
+
+<script>
+// ════════════════════════════════════════════════════════
+//  ADMIN PANELİNDEN VERİ YÜKLEME
+//  Storage key admin paneli ile aynı: 'erenx_site_data'
+// ════════════════════════════════════════════════════════
+(function() {
+  const STORAGE_KEY = 'erenx_site_data';
+
+  function getSiteData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch(e) { return null; }
+  }
+
+  // ── ŞARKILAR ──────────────────────────────────────────
+  function renderSongs(songs) {
+    // .muzik-grid, .songs-container, #songs-list gibi mevcut
+    // container'ı bul. Sitendeki gerçek selector'ü buraya yaz:
+    const container = document.querySelector('.muzik-grid, .songs-grid, #muzik-listesi, [data-section="songs"]');
+    if (!container || !songs || !songs.length) return;
+
+    container.innerHTML = songs.map(s => `
+      <div class="song-card" style="
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 18px;
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        transition: all 0.25s;
+        cursor: pointer;
+      " onclick="${s.link ? `window.open('${s.link}','_blank')` : ''}">
+        <div style="
+          width: 52px; height: 52px;
+          border-radius: 8px;
+          background: rgba(200,169,110,0.1);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 22px; flex-shrink:0; overflow:hidden;
+          ${s.cover ? `background-image:url('${s.cover}');background-size:cover;background-position:center` : ''}
+        ">${s.cover ? '' : '♪'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:3px">${s.artist}${s.album ? ' · ' + s.album : ''}${s.year ? ' · ' + s.year : ''}</div>
+          ${s.note ? `<div style="font-size:11px;color:rgba(200,169,110,0.7);margin-top:5px;font-style:italic">${s.note}</div>` : ''}
+        </div>
+        ${s.link ? `<span style="color:rgba(200,169,110,0.6);font-size:14px">↗</span>` : ''}
+      </div>
+    `).join('');
+  }
+
+  // ── KİTAPLAR ──────────────────────────────────────────
+  function renderBooks(books) {
+    const container = document.querySelector('.kitaplar-grid, .books-grid, #kitaplar-listesi, [data-section="books"]');
+    if (!container || !books || !books.length) return;
+
+    const statusLabel = { okundu:'✅ Okundu', okunuyor:'📖 Okunuyor', listede:'📌 Listede' };
+
+    container.innerHTML = books.map(b => `
+      <div class="book-card" style="
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 18px;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        transition: all 0.25s;
+      ">
+        <div style="
+          width: 52px; height: 70px;
+          border-radius: 6px;
+          background: rgba(200,169,110,0.1);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 22px; flex-shrink:0; overflow:hidden;
+          ${b.cover ? `background-image:url('${b.cover}');background-size:cover;background-position:center` : ''}
+        ">${b.cover ? '' : '📖'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px">${b.name}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:3px">${b.author}${b.year ? ' · ' + b.year : ''}</div>
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <span style="font-size:11px;background:rgba(200,169,110,0.1);color:#c8a96e;padding:2px 8px;border-radius:4px;border:1px solid rgba(200,169,110,0.2)">${statusLabel[b.status]||b.status}</span>
+            ${b.rating ? `<span style="font-size:11px;color:rgba(255,255,255,0.4)">★ ${b.rating}/10</span>` : ''}
+            ${b.genre ? `<span style="font-size:11px;color:rgba(255,255,255,0.3)">${b.genre}</span>` : ''}
+          </div>
+          ${b.note ? `<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:8px;font-style:italic;line-height:1.5">${b.note}</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── GALERİ ────────────────────────────────────────────
+  function renderGallery(gallery) {
+    const container = document.querySelector('.galeri-grid, .gallery-grid, #galeri-listesi, [data-section="gallery"]');
+    if (!container || !gallery || !gallery.length) return;
+
+    container.innerHTML = gallery.map(img => `
+      <div class="gallery-item" style="
+        border-radius: 10px;
+        overflow: hidden;
+        aspect-ratio: 1;
+        position: relative;
+        cursor: pointer;
+        border: 1px solid rgba(255,255,255,0.06);
+      " onclick="openLightbox('${img.src}', '${img.title}')">
+        <img src="${img.src}" alt="${img.title}" style="
+          width:100%; height:100%; object-fit:cover;
+          transition: transform 0.4s;
+        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        <div style="
+          position:absolute; inset:0;
+          background:linear-gradient(transparent,rgba(0,0,0,0.6));
+          opacity:0; transition:0.3s;
+          display:flex; align-items:flex-end; padding:12px;
+        " onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
+          <span style="font-size:12px;color:#fff">${img.title}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── SÖZLER ────────────────────────────────────────────
+  function renderQuotes(quotes) {
+    const container = document.querySelector('.sozler-listesi, .quotes-list, #sozler-listesi, [data-section="quotes"]');
+    if (!container || !quotes || !quotes.length) return;
+
+    container.innerHTML = quotes.map(q => `
+      <div class="quote-item" style="
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-left: 3px solid rgba(200,169,110,0.4);
+        border-radius: 8px;
+        padding: 20px 22px;
+        transition: all 0.25s;
+      ">
+        <p style="
+          font-size: 15px;
+          line-height: 1.75;
+          color: rgba(255,255,255,0.85);
+          font-style: italic;
+        ">"${q.text}"</p>
+        ${q.source ? `<p style="margin-top:10px;font-size:12px;color:rgba(200,169,110,0.7)">— ${q.source}</p>` : ''}
+      </div>
+    `).join('');
+  }
+
+  // ── GALERİ LİGHTBOX ────────────────────────────────────
+  window.openLightbox = function(src, title) {
+    let lb = document.getElementById('admin-lightbox');
+    if (!lb) {
+      lb = document.createElement('div');
+      lb.id = 'admin-lightbox';
+      lb.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px)';
+      lb.innerHTML = `
+        <button onclick="document.getElementById('admin-lightbox').style.display='none'" style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.1);color:#fff;border:none;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer">✕</button>
+        <img id="admin-lb-img" style="max-width:90vw;max-height:85vh;border-radius:8px;object-fit:contain">
+        <p id="admin-lb-title" style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.6);font-size:13px"></p>
+      `;
+      lb.addEventListener('click', e => { if(e.target===lb) lb.style.display='none'; });
+      document.body.appendChild(lb);
+    }
+    document.getElementById('admin-lb-img').src = src;
+    document.getElementById('admin-lb-title').textContent = title;
+    lb.style.display = 'flex';
+  };
+
+  // ── ANA UYGULAMA ───────────────────────────────────────
+  function applyData() {
+    const siteData = getSiteData();
+    if (!siteData) return;
+
+    // Biraz bekleyerek DOM'un hazır olmasını sağla
+    setTimeout(() => {
+      if (siteData.songs  && siteData.songs.length)   renderSongs(siteData.songs);
+      if (siteData.books  && siteData.books.length)   renderBooks(siteData.books);
+      if (siteData.gallery && siteData.gallery.length) renderGallery(siteData.gallery);
+      if (siteData.quotes && siteData.quotes.length)  renderQuotes(siteData.quotes);
+    }, 100);
+  }
+
+  // Sayfa yüklenince çalıştır
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyData);
+  } else {
+    applyData();
+  }
+
+  // Admin aynı tarayıcıda açıksa anlık güncelle
+  window.addEventListener('storage', e => {
+    if (e.key === STORAGE_KEY) applyData();
+  });
+})();
+</script>
