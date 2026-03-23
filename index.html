@@ -3,7 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>EREN</title>
+    <title>EREN — Hissettiklerim</title>
+    <meta name="description" content="Eren'in kişisel blogu. Düşünceler, müzik, fotoğraflar ve ilham veren anlar.">
+    <meta name="keywords" content="eren, müzik, blog, kişisel, hissettiklerim, sanat, fotoğraf">
+    <meta name="author" content="Eren">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://erenreal.com">
+    <meta name="google-site-verification" content="eLDlRtbj_siwJMcnAoGSY1ocJ5M_PKX7F4oZgrZEr-s">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="EREN — Hissettiklerim">
+    <meta property="og:description" content="Eren'in kişisel blogu. Düşünceler, müzik, fotoğraflar ve ilham veren anlar.">
+    <meta property="og:url" content="https://erenreal.com">
+    <meta property="og:locale" content="tr_TR">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="EREN — Hissettiklerim">
+    <meta name="twitter:description" content="Eren'in kişisel blogu. Düşünceler, müzik, fotoğraflar.">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -273,15 +289,25 @@
 
 <!-- ===== VİDEO INTRO ===== -->
 <div id="videoOverlay">
+    <!-- Ses açma ekranı - ilk gösterilen -->
+    <div id="soundUnlockScreen" style="position:absolute;inset:0;z-index:10;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,8vw,64px);letter-spacing:4px;color:#fff;text-align:center;">EREN</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.45);letter-spacing:3px;text-transform:uppercase;text-align:center;">Hissettiklerim</div>
+        <button id="startBtn" onclick="startWithSound()" style="margin-top:12px;display:flex;align-items:center;gap:10px;background:rgba(200,169,110,0.15);border:2px solid rgba(200,169,110,0.6);color:#c8a96e;padding:16px 36px;border-radius:100px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;letter-spacing:2px;cursor:pointer;transition:all 0.3s;backdrop-filter:blur(8px);">
+            <span style="font-size:20px;">🔊</span> SESİ AÇ VE İZLE
+        </button>
+        <div style="font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:1px;text-transform:uppercase;">Tıklamadan ses açılamıyor</div>
+    </div>
+
     <iframe
         id="introVideo"
-        src="https://streamable.com/e/orszc8?autoplay=1&loop=0&muted=0"
+        src=""
         allow="autoplay; fullscreen; accelerometer; gyroscope"
-        allowfullscreen="true">
+        allowfullscreen="true"
+        style="position:absolute;inset:0;width:100%;height:100%;border:none;pointer-events:none;">
     </iframe>
-    <!-- X Butonu - her zaman görünür ve tıklanabilir -->
-    <button id="videoCloseBtn" onclick="closeVideo()">✕</button>
-    <div class="video-hint">Kapatmak için ✕ tuşuna bas</div>
+    <button id="videoCloseBtn" onclick="closeVideo()" style="display:none;">✕</button>
+    <div class="video-hint" style="display:none;">Kapatmak için ✕ tuşuna bas</div>
 </div>
 
 <!-- KAR -->
@@ -506,13 +532,30 @@ const ADMIN_PASSWORD = 'eren2025';
 // ===== VİDEO =====
 let bgMusicStarted = false;
 
+function startWithSound() {
+    // Kullanıcı tıkladı = ses izni var
+    const unlockScreen = document.getElementById('soundUnlockScreen');
+    const closeBtn = document.getElementById('videoCloseBtn');
+    const hint = document.querySelector('.video-hint');
+    const videoFrame = document.getElementById('introVideo');
+
+    // Video yükle sesli
+    videoFrame.src = 'https://streamable.com/e/orszc8?autoplay=1&loop=0&muted=0';
+
+    // Unlock ekranını kaldır, X butonunu göster
+    unlockScreen.style.opacity = '0';
+    unlockScreen.style.transition = 'opacity 0.4s';
+    setTimeout(() => { unlockScreen.style.display = 'none'; }, 400);
+    closeBtn.style.display = 'flex';
+    hint.style.display = 'block';
+}
+
 function closeVideo() {
     const ov = document.getElementById('videoOverlay');
     ov.classList.add('hidden');
     document.getElementById('introVideo').src = '';
     setTimeout(() => ov.style.display = 'none', 500);
 
-    // Kullanıcı etkileşimi sonrası müziği başlat
     if (!bgMusicStarted) {
         startBgMusic();
     }
