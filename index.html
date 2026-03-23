@@ -7,21 +7,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // ===== BURAYA KENDİ FIREBASE CONFIG'İNİ YAZ =====
-        // Firebase Console > Project Settings > Your apps > Web app
         const firebaseConfig = {
-  apiKey: "AIzaSyB7HBW9x4t5sw8zD7AwNFSSN5UMu_cp4Pk",
-  authDomain: "erenreal-eb50a.firebaseapp.com",
-  projectId: "erenreal-eb50a",
-  storageBucket: "erenreal-eb50a.firebasestorage.app",
-  messagingSenderId: "220125872540",
-  appId: "1:220125872540:web:055870a9f183def0290859",
-  measurementId: "G-44V2C39FC9"
+            apiKey: "AIzaSyB7HBW9x4t5sw8zD7AwNFSSN5UMu_cp4Pk",
+            authDomain: "erenreal-eb50a.firebaseapp.com",
+            projectId: "erenreal-eb50a",
+            storageBucket: "erenreal-eb50a.firebasestorage.app",
+            messagingSenderId: "220125872540",
+            appId: "1:220125872540:web:055870a9f183def0290859"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -42,92 +38,90 @@
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg);
-            color: var(--white);
-            overflow-x: hidden;
-        }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--white); overflow-x: hidden; }
 
-        /* VIDEO INTRO OVERLAY */
+        /* ===== VIDEO OVERLAY ===== */
         #videoOverlay {
             position: fixed; inset: 0; z-index: 10000;
             background: #000;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
             transition: opacity 0.5s ease;
         }
-        #videoOverlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
+        #videoOverlay.hidden { opacity: 0; pointer-events: none; }
+
         #videoOverlay iframe {
             position: absolute; inset: 0;
             width: 100%; height: 100%;
-            border: none;
+            border: none; pointer-events: none; /* iframe tıklamayı yutmasın */
         }
+
+        /* Tüm overlay'e tıklanınca kapansın - iframe'in üstünde */
+        #videoOverlay::after {
+            content: '';
+            position: absolute; inset: 0;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        #videoCloseBtn {
+            position: absolute;
+            top: 20px; right: 20px;
+            z-index: 2;
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.5);
+            color: #fff; font-size: 22px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px);
+            transition: all 0.2s;
+            font-family: sans-serif;
+        }
+        #videoCloseBtn:hover { background: rgba(255,255,255,0.35); transform: scale(1.1); }
+
         .video-hint {
             position: absolute;
             bottom: 32px; left: 50%; transform: translateX(-50%);
-            color: rgba(255,255,255,0.5);
-            font-size: 13px; font-family: 'Outfit', sans-serif;
-            letter-spacing: 2px; text-transform: uppercase;
+            color: rgba(255,255,255,0.55);
+            font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
             animation: pulse 2s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 1;
+            z-index: 2; pointer-events: none;
+            white-space: nowrap;
         }
         @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
 
-        /* SNOW */
+        /* ===== SNOW ===== */
         #snow { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
-        .flake {
-            position: absolute; top: -20px; color: rgba(255,255,255,0.5);
-            animation: fall linear infinite; user-select: none;
-        }
+        .flake { position: absolute; top: -20px; color: rgba(255,255,255,0.5); animation: fall linear infinite; user-select: none; }
         @keyframes fall {
-            0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
-            5%   { opacity: 1; }
-            50%  { transform: translateY(55vh) translateX(20px) rotate(180deg); }
-            95%  { opacity: 0.5; }
+            0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+            5% { opacity: 1; }
+            50% { transform: translateY(55vh) translateX(20px) rotate(180deg); }
+            95% { opacity: 0.5; }
             100% { transform: translateY(110vh) translateX(-10px) rotate(360deg); opacity: 0; }
         }
 
-        /* NAV */
+        /* ===== NAV ===== */
         nav {
             position: fixed; top: 0; left: 0; right: 0; z-index: 200;
             display: flex; align-items: center; justify-content: space-between;
             padding: 18px 28px;
-            background: rgba(8,8,8,0.8);
-            backdrop-filter: blur(24px);
+            background: rgba(8,8,8,0.8); backdrop-filter: blur(24px);
             border-bottom: 1px solid var(--border);
         }
-        .logo {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(18px, 4vw, 24px);
-            letter-spacing: 3px;
-            color: var(--white);
-            text-decoration: none;
-        }
+        .logo { font-family: 'Bebas Neue', sans-serif; font-size: clamp(18px,4vw,24px); letter-spacing: 3px; color: var(--white); text-decoration: none; }
         .logo span { color: var(--accent); }
         .nav-links { display: flex; gap: 4px; }
-        .nav-links a {
-            color: rgba(255,255,255,0.6); text-decoration: none;
-            font-size: 13px; font-weight: 500;
-            padding: 7px 14px; border-radius: 100px;
-            border: 1px solid transparent; transition: all 0.25s;
-        }
+        .nav-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 100px; border: 1px solid transparent; transition: all 0.25s; }
         .nav-links a:hover { color: #fff; border-color: var(--border); background: var(--glass); }
         .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
-        .hamburger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.3s; }
+        .hamburger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; }
 
-        /* GİZLİ ADMIN BUTONU */
+        /* ===== ADMIN TRIGGER ===== */
         .admin-trigger {
-            position: fixed;
-            bottom: 18px; right: 18px;
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
+            position: fixed; bottom: 18px; right: 18px;
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
             cursor: pointer; z-index: 999;
             display: flex; align-items: center; justify-content: center;
             transition: all 0.3s; opacity: 0.15;
@@ -135,66 +129,27 @@
         .admin-trigger:hover { opacity: 1; background: rgba(200,169,110,0.15); border-color: var(--accent); }
         .admin-trigger i { font-size: 14px; color: var(--accent); }
 
-        /* ADMIN OVERLAY */
-        .admin-overlay {
-            position: fixed; inset: 0; z-index: 9998;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-            display: none; align-items: center; justify-content: center;
-        }
+        /* ===== ADMIN OVERLAY ===== */
+        .admin-overlay { position: fixed; inset: 0; z-index: 9998; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; }
         .admin-overlay.open { display: flex; }
-        .admin-panel {
-            background: #0f0f0f;
-            border: 1px solid rgba(200,169,110,0.3);
-            border-radius: 16px;
-            width: min(700px, 96vw);
-            max-height: 90vh; overflow-y: auto;
-            padding: 32px; position: relative;
-        }
+        .admin-panel { background: #0f0f0f; border: 1px solid rgba(200,169,110,0.3); border-radius: 16px; width: min(700px,96vw); max-height: 90vh; overflow-y: auto; padding: 32px; position: relative; }
         .admin-panel::-webkit-scrollbar { width: 4px; }
         .admin-panel::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
-        .admin-header {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 28px; padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-        }
+        .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
         .admin-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--accent); }
-        .admin-close {
-            width: 32px; height: 32px; border-radius: 8px;
-            background: var(--glass); border: 1px solid var(--border);
-            color: var(--white); cursor: pointer; font-size: 16px;
-            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-        }
+        .admin-close { width: 32px; height: 32px; border-radius: 8px; background: var(--glass); border: 1px solid var(--border); color: var(--white); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .admin-close:hover { background: rgba(255,80,80,0.15); border-color: rgba(255,80,80,0.4); }
 
-        /* LOGIN */
         .admin-login { text-align: center; padding: 20px 0; }
         .admin-login p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
-        .admin-input {
-            width: 100%; padding: 12px 16px;
-            background: var(--glass); border: 1px solid var(--border);
-            border-radius: 10px; color: var(--white); font-size: 15px;
-            font-family: 'Outfit', sans-serif;
-            outline: none; transition: border 0.2s; margin-bottom: 12px;
-        }
+        .admin-input { width: 100%; padding: 12px 16px; background: var(--glass); border: 1px solid var(--border); border-radius: 10px; color: var(--white); font-size: 15px; font-family: 'Outfit', sans-serif; outline: none; transition: border 0.2s; margin-bottom: 12px; }
         .admin-input:focus { border-color: var(--accent); }
-        .admin-btn {
-            width: 100%; padding: 12px; border-radius: 10px;
-            background: var(--accent); border: none;
-            color: #000; font-weight: 700; font-size: 14px;
-            letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
-            font-family: 'Outfit', sans-serif;
-        }
+        .admin-btn { width: 100%; padding: 12px; border-radius: 10px; background: var(--accent); border: none; color: #000; font-weight: 700; font-size: 14px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; }
         .admin-btn:hover { background: #dfc07e; transform: translateY(-1px); }
         .login-error { color: #ff6b6b; font-size: 13px; margin-top: 8px; display: none; }
 
-        /* ADMIN TABS */
         .admin-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-        .tab-btn {
-            padding: 8px 16px; border-radius: 8px;
-            background: var(--glass); border: 1px solid var(--border);
-            color: var(--muted); font-size: 13px; font-weight: 500;
-            cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif;
-        }
+        .tab-btn { padding: 8px 16px; border-radius: 8px; background: var(--glass); border: 1px solid var(--border); color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; }
         .tab-btn.active { background: rgba(200,169,110,0.15); border-color: var(--accent); color: var(--accent); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -204,185 +159,74 @@
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
 
-        .preview-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px; margin-top: 12px;
-        }
-        .preview-item {
-            position: relative; aspect-ratio: 1;
-            border-radius: 8px; overflow: hidden; border: 1px solid var(--border);
-        }
+        .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 12px; }
+        .preview-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
         .preview-item img { width: 100%; height: 100%; object-fit: cover; }
-        .preview-item .del-btn {
-            position: absolute; top: 4px; right: 4px;
-            width: 22px; height: 22px; border-radius: 6px;
-            background: rgba(255,80,80,0.8); border: none;
-            color: #fff; font-size: 10px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .preview-item .del-btn { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 6px; background: rgba(255,80,80,0.8); border: none; color: #fff; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        .upload-zone {
-            border: 2px dashed var(--border); border-radius: 10px;
-            padding: 24px; text-align: center; cursor: pointer;
-            transition: all 0.2s; position: relative;
-        }
+        .upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
         .upload-zone:hover { border-color: var(--accent); background: rgba(200,169,110,0.05); }
         .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
         .upload-zone i { font-size: 24px; color: var(--muted); margin-bottom: 8px; display: block; }
         .upload-zone span { font-size: 13px; color: var(--muted); }
 
-        .save-btn {
-            display: flex; align-items: center; gap: 8px;
-            padding: 10px 20px; border-radius: 10px;
-            background: rgba(200,169,110,0.15); border: 1px solid var(--accent);
-            color: var(--accent); font-size: 13px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif;
-            margin-top: 16px;
-        }
+        .save-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; background: rgba(200,169,110,0.15); border: 1px solid var(--accent); color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; margin-top: 16px; }
         .save-btn:hover { background: rgba(200,169,110,0.25); }
 
-        /* LOADING */
-        .db-loading {
-            display: inline-block; width: 16px; height: 16px;
-            border: 2px solid var(--border); border-top-color: var(--accent);
-            border-radius: 50%; animation: spin 0.8s linear infinite;
-            margin-right: 8px; vertical-align: middle;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* HERO */
-        #home {
-            min-height: 100vh;
-            display: flex; align-items: center;
-            padding: 110px 28px 60px;
-            position: relative; overflow: hidden;
-        }
-        .hero-bg {
-            position: absolute; inset: 0;
-            background-size: cover; background-position: center;
-            filter: brightness(0.35) saturate(0.8);
-            transition: background-image 0.6s ease;
-        }
-        .hero-bg::after {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(135deg, rgba(8,8,8,0.6) 0%, transparent 50%, rgba(8,8,8,0.8) 100%);
-        }
+        /* ===== HERO ===== */
+        #home { min-height: 100vh; display: flex; align-items: center; padding: 110px 28px 60px; position: relative; overflow: hidden; }
+        .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.35) saturate(0.8); transition: background-image 0.6s ease; }
+        .hero-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(8,8,8,0.6) 0%, transparent 50%, rgba(8,8,8,0.8) 100%); }
         .hero-content { position: relative; z-index: 2; max-width: 680px; }
-        .hero-tag {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(200,169,110,0.12);
-            border: 1px solid rgba(200,169,110,0.35);
-            border-radius: 100px;
-            padding: 6px 14px; font-size: 12px;
-            color: var(--accent); letter-spacing: 2px; font-weight: 500;
-            margin-bottom: 24px; text-transform: uppercase;
-        }
-        .hero-name {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(52px, 12vw, 120px);
-            line-height: 0.95; letter-spacing: 2px;
-            background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .hero-subtitle {
-            font-size: clamp(14px, 2vw, 17px);
-            color: var(--muted); font-weight: 300;
-            margin: 20px 0 36px; line-height: 1.7; max-width: 500px;
-        }
+        .hero-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(200,169,110,0.12); border: 1px solid rgba(200,169,110,0.35); border-radius: 100px; padding: 6px 14px; font-size: 12px; color: var(--accent); letter-spacing: 2px; font-weight: 500; margin-bottom: 24px; text-transform: uppercase; }
+        .hero-name { font-family: 'Bebas Neue', sans-serif; font-size: clamp(52px, 12vw, 120px); line-height: 0.95; letter-spacing: 2px; background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero-subtitle { font-size: clamp(14px, 2vw, 17px); color: var(--muted); font-weight: 300; margin: 20px 0 36px; line-height: 1.7; max-width: 500px; }
         .hero-subtitle span { color: var(--accent); }
         .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
-        .btn-primary {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: var(--accent); color: #000;
-            padding: 13px 28px; border-radius: 100px;
-            font-weight: 700; font-size: 14px; text-decoration: none;
-            transition: all 0.3s; letter-spacing: 0.5px;
-        }
+        .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: #000; padding: 13px 28px; border-radius: 100px; font-weight: 700; font-size: 14px; text-decoration: none; transition: all 0.3s; letter-spacing: 0.5px; }
         .btn-primary:hover { background: #dfc07e; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(200,169,110,0.3); }
-        .btn-ghost {
-            display: inline-flex; align-items: center; gap: 8px;
-            border: 1px solid var(--border); color: rgba(255,255,255,0.7);
-            padding: 13px 28px; border-radius: 100px;
-            font-weight: 500; font-size: 14px; text-decoration: none; transition: all 0.3s;
-        }
+        .btn-ghost { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); color: rgba(255,255,255,0.7); padding: 13px 28px; border-radius: 100px; font-weight: 500; font-size: 14px; text-decoration: none; transition: all 0.3s; }
         .btn-ghost:hover { border-color: rgba(255,255,255,0.4); color: #fff; background: var(--glass); }
-
-        .hero-stats {
-            position: absolute; bottom: 40px; right: 28px;
-            display: flex; gap: 32px; z-index: 2;
-        }
+        .hero-stats { position: absolute; bottom: 40px; right: 28px; display: flex; gap: 32px; z-index: 2; }
         .stat { text-align: center; }
         .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: clamp(28px, 5vw, 42px); color: var(--accent); line-height: 1; }
         .stat-label { font-size: 11px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
 
-        /* SECTIONS */
+        /* ===== SECTIONS ===== */
         section { padding: 80px 28px; max-width: 1100px; margin: 0 auto; }
         .section-tag { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; display: block; }
         .section-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 7vw, 64px); line-height: 1; letter-spacing: 1px; margin-bottom: 20px; }
         .section-desc { color: var(--muted); font-size: 15px; line-height: 1.8; max-width: 580px; margin-bottom: 48px; }
 
-        /* GALLERY */
-        .gallery-masonry { columns: 3; column-gap: 14px; transition: all 0.3s; }
+        /* ===== GALLERY ===== */
+        .gallery-masonry { columns: 3; column-gap: 14px; }
         @media (max-width: 640px) { .gallery-masonry { columns: 2; } }
         @media (max-width: 380px) { .gallery-masonry { columns: 1; } }
-        .gallery-item {
-            break-inside: avoid; margin-bottom: 14px;
-            border-radius: 12px; overflow: hidden;
-            position: relative; cursor: pointer;
-            border: 1px solid var(--border);
-            transition: transform 0.3s, box-shadow 0.3s; display: block;
-        }
+        .gallery-item { break-inside: avoid; margin-bottom: 14px; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; display: block; }
         .gallery-item:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         .gallery-item img { width: 100%; display: block; transition: transform 0.5s; }
         .gallery-item:hover img { transform: scale(1.03); }
-        .gallery-item .overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%);
-            opacity: 0; transition: opacity 0.3s;
-            display: flex; align-items: flex-end; padding: 16px;
-        }
+        .gallery-item .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%); opacity: 0; transition: opacity 0.3s; display: flex; align-items: flex-end; padding: 16px; }
         .gallery-item:hover .overlay { opacity: 1; }
         .gallery-item .overlay span { font-size: 12px; color: rgba(255,255,255,0.8); }
-        .gallery-empty {
-            text-align: center; padding: 60px;
-            color: var(--muted); font-size: 14px;
-            border: 2px dashed var(--border); border-radius: 16px;
-        }
+        .gallery-empty { text-align: center; padding: 60px; color: var(--muted); font-size: 14px; border: 2px dashed var(--border); border-radius: 16px; }
         .gallery-empty i { font-size: 36px; display: block; margin-bottom: 12px; opacity: 0.3; }
 
-        /* BOOKS */
+        /* ===== BOOKS ===== */
         .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 24px; }
-        .book-card {
-            background: var(--glass); border: 1px solid var(--border);
-            border-radius: 14px; overflow: hidden; transition: all 0.3s; cursor: pointer;
-        }
+        .book-card { background: var(--glass); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: all 0.3s; cursor: pointer; }
         .book-card:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        .book-cover {
-            aspect-ratio: 3/4; background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-            position: relative; overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .book-cover { aspect-ratio: 3/4; background: linear-gradient(135deg, #1a1a1a, #2a2a2a); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .book-cover img { width: 100%; height: 100%; object-fit: cover; }
         .book-cover-placeholder { color: var(--muted); font-size: 36px; }
         .book-info { padding: 14px; }
         .book-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
         .book-meta { font-size: 12px; color: var(--muted); }
-        .books-empty {
-            text-align: center; padding: 60px;
-            color: var(--muted); font-size: 14px;
-            border: 2px dashed var(--border); border-radius: 16px;
-        }
+        .books-empty { text-align: center; padding: 60px; color: var(--muted); font-size: 14px; border: 2px dashed var(--border); border-radius: 16px; }
 
-        /* MUSIC */
+        /* ===== MUSIC ===== */
         .music-list { display: flex; flex-direction: column; gap: 12px; }
-        .music-card {
-            background: var(--glass); border: 1px solid var(--border);
-            border-radius: 14px; padding: 16px 20px;
-            display: flex; align-items: center; gap: 16px;
-            transition: all 0.3s; cursor: pointer;
-        }
+        .music-card { background: var(--glass); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; transition: all 0.3s; cursor: pointer; }
         .music-card:hover { border-color: var(--accent); background: rgba(200,169,110,0.06); }
         .music-thumb { width: 52px; height: 52px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: #1a1a1a; }
         .music-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -393,26 +237,23 @@
         .music-play { color: var(--accent); font-size: 20px; flex-shrink: 0; }
         .music-empty { text-align: center; padding: 60px; color: var(--muted); font-size: 14px; border: 2px dashed var(--border); border-radius: 16px; }
 
-        /* FOOTER */
+        /* ===== FOOTER ===== */
         footer { text-align: center; padding: 40px 28px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
         footer a { color: var(--accent); text-decoration: none; }
 
-        /* LIGHTBOX */
-        .lightbox {
-            position: fixed; inset: 0; z-index: 5000;
-            background: rgba(0,0,0,0.95);
-            display: none; align-items: center; justify-content: center; padding: 20px;
-        }
+        /* ===== LIGHTBOX ===== */
+        .lightbox { position: fixed; inset: 0; z-index: 5000; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; padding: 20px; }
         .lightbox.open { display: flex; }
         .lightbox img { max-width: 100%; max-height: 90vh; border-radius: 12px; object-fit: contain; }
-        .lightbox-close {
-            position: absolute; top: 20px; right: 20px;
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(255,255,255,0.1); border: none;
-            color: #fff; font-size: 18px; cursor: pointer;
-        }
+        .lightbox-close { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: #fff; font-size: 18px; cursor: pointer; }
 
-        /* Scrollbar */
+        /* ===== DB STATUS ===== */
+        #dbStatus { position: fixed; top: 72px; right: 14px; z-index: 100; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-family: 'Outfit', sans-serif; opacity: 0; transition: opacity 0.4s; }
+        #dbStatus.show { opacity: 1; }
+        #dbStatus.ok { background: rgba(80,200,120,0.15); border: 1px solid rgba(80,200,120,0.4); color: #4eca78; }
+        #dbStatus.err { background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.4); color: #ff6b6b; }
+
+        /* ===== RESPONSIVE ===== */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: rgba(200,169,110,0.3); border-radius: 4px; }
@@ -421,42 +262,28 @@
         @media (max-width: 520px) {
             .nav-links { display: none; }
             .hamburger { display: flex; }
-            .nav-links.open {
-                display: flex; flex-direction: column; gap: 4px;
-                position: fixed; top: 65px; left: 0; right: 0;
-                background: rgba(8,8,8,0.97); backdrop-filter: blur(24px);
-                padding: 20px; border-bottom: 1px solid var(--border);
-            }
+            .nav-links.open { display: flex; flex-direction: column; gap: 4px; position: fixed; top: 65px; left: 0; right: 0; background: rgba(8,8,8,0.97); backdrop-filter: blur(24px); padding: 20px; border-bottom: 1px solid var(--border); }
             .nav-links.open a { text-align: center; }
             .hero-stats { position: static; margin-top: 40px; justify-content: flex-start; }
         }
-
-        /* Firebase status badge */
-        #dbStatus {
-            position: fixed; top: 72px; right: 14px; z-index: 100;
-            font-size: 11px; padding: 4px 10px; border-radius: 20px;
-            font-family: 'Outfit', sans-serif; opacity: 0;
-            transition: opacity 0.4s;
-        }
-        #dbStatus.show { opacity: 1; }
-        #dbStatus.ok { background: rgba(80,200,120,0.15); border: 1px solid rgba(80,200,120,0.4); color: #4eca78; }
-        #dbStatus.err { background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.4); color: #ff6b6b; }
     </style>
 </head>
 <body>
 
-<!-- VIDEO INTRO -->
+<!-- ===== VİDEO INTRO ===== -->
 <div id="videoOverlay" onclick="closeVideo()">
     <iframe
         id="introVideo"
-        src="https://streamable.com/e/orszc8?autoplay=1&muted=0&loop=0&nocontrols=1"
+        src="https://streamable.com/e/orszc8?autoplay=1&loop=0"
         allow="autoplay; fullscreen"
         allowfullscreen>
     </iframe>
-    <div class="video-hint">Kapatmak için tıkla</div>
+    <!-- X Butonu - her zaman görünür ve tıklanabilir -->
+    <button id="videoCloseBtn" onclick="closeVideo()">✕</button>
+    <div class="video-hint">Herhangi bir yere tıkla · Kapat</div>
 </div>
 
-<!-- KAR EFEKTİ -->
+<!-- KAR -->
 <div id="snow"></div>
 
 <!-- DB STATUS -->
@@ -471,13 +298,11 @@
         <a href="#books">Kitaplar</a>
         <a href="#music">Şarkılar</a>
     </div>
-    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
-        <span></span><span></span><span></span>
-    </div>
+    <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
 </nav>
 
 <!-- HERO -->
-<section id="home" style="padding:0; max-width:none;">
+<section id="home" style="padding:0;max-width:none;">
     <div class="hero-bg" id="heroBg"></div>
     <div class="hero-content">
         <div class="hero-tag">
@@ -485,23 +310,15 @@
             <span id="heroTagText">KİŞİSEL BLOG</span>
         </div>
         <h1 class="hero-name">EREN<br></h1>
-        <p class="hero-subtitle" id="heroSubtitle">
-            Düşünceler, anlar ve <span>ilham.</span>
-        </p>
+        <p class="hero-subtitle" id="heroSubtitle">Düşünceler, anlar ve <span>ilham.</span></p>
         <div class="hero-cta">
             <a href="#gallery" class="btn-primary"><i class="fas fa-images"></i> Galeri</a>
             <a href="#music" class="btn-ghost"><i class="fas fa-headphones"></i> Şarkılar</a>
         </div>
     </div>
     <div class="hero-stats">
-        <div class="stat">
-            <div class="stat-num" id="statYear">2025</div>
-            <div class="stat-label">Yıl</div>
-        </div>
-        <div class="stat">
-            <div class="stat-num" id="statAlbum">∞</div>
-            <div class="stat-label">Şarkı</div>
-        </div>
+        <div class="stat"><div class="stat-num" id="statYear">2025</div><div class="stat-label">Yıl</div></div>
+        <div class="stat"><div class="stat-num" id="statAlbum">∞</div><div class="stat-label">Şarkı</div></div>
     </div>
 </section>
 
@@ -539,10 +356,8 @@
     <p>© 2025 <a href="#">Eren</a> — Tüm Hakları Saklıdır</p>
 </footer>
 
-<!-- GİZLİ ADMIN BUTONU -->
-<div class="admin-trigger" id="adminTrigger" title="Admin" onclick="openAdmin()">
-    <i class="fas fa-key"></i>
-</div>
+<!-- GİZLİ ADMIN -->
+<div class="admin-trigger" onclick="openAdmin()"><i class="fas fa-key"></i></div>
 
 <!-- ADMIN PANEL -->
 <div class="admin-overlay" id="adminOverlay">
@@ -552,7 +367,6 @@
             <button class="admin-close" onclick="closeAdmin()"><i class="fas fa-times"></i></button>
         </div>
 
-        <!-- LOGIN -->
         <div id="adminLogin">
             <div class="admin-login">
                 <p>Devam etmek için şifreyi girin</p>
@@ -562,24 +376,23 @@
             </div>
         </div>
 
-        <!-- PANEL CONTENT -->
         <div id="adminContent" style="display:none;">
-            <div id="dbInfo" style="background:rgba(200,169,110,0.08);border:1px solid rgba(200,169,110,0.2);border-radius:10px;padding:10px 14px;margin-bottom:20px;font-size:12px;color:var(--muted);">
+            <div style="background:rgba(200,169,110,0.08);border:1px solid rgba(200,169,110,0.2);border-radius:10px;padding:10px 14px;margin-bottom:20px;font-size:12px;color:var(--muted);">
                 <i class="fas fa-database" style="color:var(--accent);margin-right:6px;"></i>
-                Veriler Firebase'e kaydedilir ve tüm ziyaretçiler görebilir.
+                Veriler Firebase'e kaydedilir — herkes görebilir.
             </div>
 
             <div class="admin-tabs">
-                <button class="tab-btn active" onclick="switchTab('hero', this)"><i class="fas fa-home"></i> Ana Sayfa</button>
-                <button class="tab-btn" onclick="switchTab('gallery', this)"><i class="fas fa-images"></i> Galeri</button>
-                <button class="tab-btn" onclick="switchTab('books', this)"><i class="fas fa-book"></i> Kitaplar</button>
-                <button class="tab-btn" onclick="switchTab('music', this)"><i class="fas fa-music"></i> Şarkılar</button>
+                <button class="tab-btn active" onclick="switchTab('hero',this)"><i class="fas fa-home"></i> Ana Sayfa</button>
+                <button class="tab-btn" onclick="switchTab('gallery',this)"><i class="fas fa-images"></i> Galeri</button>
+                <button class="tab-btn" onclick="switchTab('books',this)"><i class="fas fa-book"></i> Kitaplar</button>
+                <button class="tab-btn" onclick="switchTab('music',this)"><i class="fas fa-music"></i> Şarkılar</button>
             </div>
 
             <!-- HERO TAB -->
             <div class="tab-content active" id="tab-hero">
                 <div class="form-section">
-                    <label class="form-label">Arka Plan Fotoğrafı (Base64)</label>
+                    <label class="form-label">Arka Plan Fotoğrafı</label>
                     <div class="upload-zone">
                         <input type="file" accept="image/*" onchange="handleHeroBg(this)">
                         <i class="fas fa-cloud-upload-alt"></i>
@@ -599,14 +412,8 @@
                     <textarea class="admin-input" id="heroSubInput" rows="3" style="resize:vertical;" oninput="document.getElementById('heroSubtitle').innerHTML=this.value"></textarea>
                 </div>
                 <div class="form-row">
-                    <div>
-                        <label class="form-label">Yıl</label>
-                        <input type="text" class="admin-input" id="statYearInput" placeholder="2025" oninput="document.getElementById('statYear').textContent=this.value">
-                    </div>
-                    <div>
-                        <label class="form-label">Şarkı Sayısı / Sembol</label>
-                        <input type="text" class="admin-input" id="statAlbumInput" placeholder="∞" oninput="document.getElementById('statAlbum').textContent=this.value">
-                    </div>
+                    <div><label class="form-label">Yıl</label><input type="text" class="admin-input" id="statYearInput" placeholder="2025" oninput="document.getElementById('statYear').textContent=this.value"></div>
+                    <div><label class="form-label">Şarkı Sayısı</label><input type="text" class="admin-input" id="statAlbumInput" placeholder="∞" oninput="document.getElementById('statAlbum').textContent=this.value"></div>
                 </div>
                 <button class="save-btn" onclick="saveHero()"><i class="fas fa-save"></i> Kaydet</button>
             </div>
@@ -620,13 +427,11 @@
                         <i class="fas fa-images"></i>
                         <span>Birden fazla fotoğraf seçebilirsin</span>
                     </div>
-                    <p style="font-size:11px;color:var(--muted);margin-top:8px;">💡 Fotoğraflar Firebase'e kaydedilir, herkes görür.</p>
+                    <p style="font-size:11px;color:var(--muted);margin-top:8px;">💡 Firebase'e kaydolur, herkes görür.</p>
                 </div>
                 <div class="form-section">
                     <label class="form-label">Mevcut Fotoğraflar</label>
-                    <div class="preview-grid" id="galleryAdminPreview">
-                        <div style="color:var(--muted);font-size:13px;padding:12px;">Yükleniyor...</div>
-                    </div>
+                    <div class="preview-grid" id="galleryAdminPreview"><div style="color:var(--muted);font-size:13px;padding:12px;">Yükleniyor...</div></div>
                 </div>
             </div>
 
@@ -681,44 +486,23 @@
 </div>
 
 <script>
-// ========== CONFIG ==========
-const ADMIN_PASSWORD = 'eren2025'; // ← Şifreyi buradan değiştir
+const ADMIN_PASSWORD = 'eren2025';
 
-// ========== VIDEO ==========
+// ===== VİDEO =====
 function closeVideo() {
-    const overlay = document.getElementById('videoOverlay');
-    overlay.classList.add('hidden');
-    setTimeout(() => overlay.style.display = 'none', 500);
+    const ov = document.getElementById('videoOverlay');
+    ov.classList.add('hidden');
     // iframe'i durdur
     document.getElementById('introVideo').src = '';
+    setTimeout(() => ov.style.display = 'none', 500);
 }
 
-// ========== FIREBASE ==========
-let db = null;
-let firestore = null;
+// ===== FİREBASE =====
+let db = null, firestore = null;
 
-// 5 sabit fotoğraf (base64 yerine data URI placeholder - sen bunları Firebase'e yüklersin)
-// Şimdilik fotoğrafları base64'e convert edip Firebase'e kaydediyoruz
-const DEFAULT_PHOTOS = [
-    { src: '/mnt/user-data/uploads/4bac6a840d984b824b21ea82e2dc2670.jpg', caption: 'Foto 1' },
-    { src: '/mnt/user-data/uploads/d51953003faa212a6e0c40285f80cfdd.jpg', caption: 'Foto 2' },
-    { src: '/mnt/user-data/uploads/296e8bdefdc41c7bf188853c1bcd9cca.jpg', caption: 'Foto 3' },
-    { src: '/mnt/user-data/uploads/a04a1190d9151e42d42f9ef20e741c79.jpg', caption: 'Foto 4' },
-    { src: '/mnt/user-data/uploads/8017b3ee5ec080873d47a01954251452.jpg', caption: 'Foto 5' },
-];
-
-// In-memory data cache
 let cache = {
-    hero: {
-        heroTag: 'KİŞİSEL BLOG',
-        heroSubtitle: 'Düşünceler, anlar ve <span>ilham.</span>',
-        statYear: '2025',
-        statAlbum: '∞',
-        heroBg: ''
-    },
-    gallery: [],
-    books: [],
-    music: []
+    hero: { heroTag: 'KİŞİSEL BLOG', heroSubtitle: 'Düşünceler, anlar ve <span>ilham.</span>', statYear: '2025', statAlbum: '∞', heroBg: '' },
+    gallery: [], books: [], music: []
 };
 
 function showDbStatus(ok, msg) {
@@ -735,33 +519,21 @@ window.addEventListener('firebase-ready', async () => {
     await loadAll();
 });
 
-// Fallback if firebase config not set
-setTimeout(() => {
-    if (!db) {
-        showDbStatus(false, '⚠ Firebase config eksik');
-        renderAll();
-    }
-}, 3000);
+setTimeout(() => { if (!db) { showDbStatus(false, '⚠ Firebase bağlanmadı'); renderAll(); } }, 4000);
 
-// ========== LOAD ==========
 async function loadAll() {
     if (!db) return;
     const { doc, getDoc, collection, getDocs } = firestore;
-
     try {
-        // Hero
         const heroSnap = await getDoc(doc(db, 'site', 'hero'));
         if (heroSnap.exists()) cache.hero = { ...cache.hero, ...heroSnap.data() };
 
-        // Gallery
         const galSnap = await getDocs(collection(db, 'gallery'));
         cache.gallery = galSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        // Books
         const bookSnap = await getDocs(collection(db, 'books'));
         cache.books = bookSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        // Music
         const musicSnap = await getDocs(collection(db, 'music'));
         cache.music = musicSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
@@ -774,7 +546,7 @@ async function loadAll() {
     }
 }
 
-// ========== RENDER ==========
+// ===== RENDER =====
 function renderAll() {
     const h = cache.hero;
     document.getElementById('heroTagText').textContent = h.heroTag;
@@ -782,57 +554,43 @@ function renderAll() {
     document.getElementById('statYear').textContent = h.statYear;
     document.getElementById('statAlbum').textContent = h.statAlbum;
     if (h.heroBg) document.getElementById('heroBg').style.backgroundImage = `url('${h.heroBg}')`;
-    renderGallery();
-    renderBooks();
-    renderMusic();
+    renderGallery(); renderBooks(); renderMusic();
 }
 
-// ========== GALLERY ==========
+// ===== GALLERY =====
 function renderGallery() {
     const grid = document.getElementById('galleryGrid');
-    const items = cache.gallery.length ? cache.gallery : [];
-    if (!items.length) {
+    if (!cache.gallery.length) {
         grid.innerHTML = '<div class="gallery-empty"><i class="fas fa-camera"></i>Henüz fotoğraf eklenmedi.</div>';
         return;
     }
-    grid.innerHTML = items.map((img, i) => `
+    grid.innerHTML = cache.gallery.map(img => `
         <div class="gallery-item" onclick="openLightbox('${img.src}')">
             <img src="${img.src}" alt="${img.caption||''}" loading="lazy">
             <div class="overlay"><span>${img.caption||''}</span></div>
-        </div>
-    `).join('');
+        </div>`).join('');
 }
 
 function renderGalleryAdmin() {
     const prev = document.getElementById('galleryAdminPreview');
-    if (!cache.gallery.length) {
-        prev.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px;">Henüz fotoğraf yok</div>';
-        return;
-    }
-    prev.innerHTML = cache.gallery.map((img, i) => `
+    if (!cache.gallery.length) { prev.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px;">Henüz fotoğraf yok</div>'; return; }
+    prev.innerHTML = cache.gallery.map(img => `
         <div class="preview-item">
             <img src="${img.src}" alt="">
             <button class="del-btn" onclick="deleteGalleryItem('${img.id}')"><i class="fas fa-trash"></i></button>
-        </div>
-    `).join('');
+        </div>`).join('');
 }
 
 async function handleGalleryUpload(input) {
     if (!db) { showToast('⚠ Firebase bağlı değil'); return; }
     const { collection, addDoc } = firestore;
-    const files = Array.from(input.files);
     showToast('⏳ Yükleniyor...');
-    for (const file of files) {
+    for (const file of Array.from(input.files)) {
         const base64 = await fileToBase64(file);
-        const docRef = await addDoc(collection(db, 'gallery'), {
-            src: base64,
-            caption: file.name.replace(/\.[^.]+$/, ''),
-            createdAt: Date.now()
-        });
-        cache.gallery.push({ id: docRef.id, src: base64, caption: file.name.replace(/\.[^.]+$/, '') });
+        const ref = await addDoc(collection(db, 'gallery'), { src: base64, caption: file.name.replace(/\.[^.]+$/,''), createdAt: Date.now() });
+        cache.gallery.push({ id: ref.id, src: base64, caption: file.name.replace(/\.[^.]+$/,'') });
     }
-    renderGallery();
-    renderGalleryAdmin();
+    renderGallery(); renderGalleryAdmin();
     showToast('✅ Fotoğraflar yüklendi!');
 }
 
@@ -841,12 +599,11 @@ async function deleteGalleryItem(id) {
     const { doc, deleteDoc } = firestore;
     await deleteDoc(doc(db, 'gallery', id));
     cache.gallery = cache.gallery.filter(x => x.id !== id);
-    renderGallery();
-    renderGalleryAdmin();
+    renderGallery(); renderGalleryAdmin();
     showToast('🗑 Silindi');
 }
 
-// ========== BOOKS ==========
+// ===== BOOKS =====
 function renderBooks() {
     const grid = document.getElementById('booksGrid');
     if (!cache.books.length) {
@@ -855,15 +612,9 @@ function renderBooks() {
     }
     grid.innerHTML = cache.books.map(b => `
         <div class="book-card">
-            <div class="book-cover">
-                ${b.cover ? `<img src="${b.cover}" alt="${b.title}">` : '<i class="fas fa-book book-cover-placeholder"></i>'}
-            </div>
-            <div class="book-info">
-                <div class="book-title">${b.title}</div>
-                <div class="book-meta">${b.author||''}</div>
-            </div>
-        </div>
-    `).join('');
+            <div class="book-cover">${b.cover ? `<img src="${b.cover}" alt="${b.title}">` : '<i class="fas fa-book book-cover-placeholder"></i>'}</div>
+            <div class="book-info"><div class="book-title">${b.title}</div><div class="book-meta">${b.author||''}</div></div>
+        </div>`).join('');
 }
 
 function renderBooksAdmin() {
@@ -872,13 +623,9 @@ function renderBooksAdmin() {
     list.innerHTML = cache.books.map(b => `
         <div style="display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:10px 14px;">
             ${b.cover ? `<img src="${b.cover}" style="width:36px;height:48px;object-fit:cover;border-radius:6px;">` : '<i class="fas fa-book" style="color:var(--muted);font-size:20px;width:36px;text-align:center;"></i>'}
-            <div style="flex:1;min-width:0;">
-                <div style="font-size:14px;font-weight:600;">${b.title}</div>
-                <div style="font-size:12px;color:var(--muted);">${b.author}</div>
-            </div>
+            <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;">${b.title}</div><div style="font-size:12px;color:var(--muted);">${b.author}</div></div>
             <button onclick="deleteBook('${b.id}')" style="background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.3);color:#ff6b6b;padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;">Sil</button>
-        </div>
-    `).join('');
+        </div>`).join('');
 }
 
 async function addBook() {
@@ -888,10 +635,10 @@ async function addBook() {
     if (!title) return;
     const { collection, addDoc } = firestore;
     let cover = '';
-    const coverFile = document.getElementById('bookCoverInput').files[0];
-    if (coverFile) cover = await fileToBase64(coverFile);
-    const docRef = await addDoc(collection(db, 'books'), { title, author, cover, createdAt: Date.now() });
-    cache.books.push({ id: docRef.id, title, author, cover });
+    const cf = document.getElementById('bookCoverInput').files[0];
+    if (cf) cover = await fileToBase64(cf);
+    const ref = await addDoc(collection(db, 'books'), { title, author, cover, createdAt: Date.now() });
+    cache.books.push({ id: ref.id, title, author, cover });
     renderBooks(); renderBooksAdmin();
     document.getElementById('bookTitleInput').value = '';
     document.getElementById('bookAuthorInput').value = '';
@@ -908,7 +655,7 @@ async function deleteBook(id) {
     showToast('🗑 Silindi');
 }
 
-// ========== MUSIC ==========
+// ===== MUSIC =====
 function renderMusic() {
     const list = document.getElementById('musicList');
     if (!cache.music.length) {
@@ -917,16 +664,10 @@ function renderMusic() {
     }
     list.innerHTML = cache.music.map(t => `
         <div class="music-card" onclick="${t.link ? `window.open('${t.link}','_blank')` : ''}">
-            <div class="music-thumb">
-                ${t.thumb ? `<img src="${t.thumb}" alt="">` : '<div class="music-thumb-placeholder"><i class="fas fa-music"></i></div>'}
-            </div>
-            <div class="music-info">
-                <div class="music-title">${t.title}</div>
-                <div class="music-genre">${t.genre||''}</div>
-            </div>
+            <div class="music-thumb">${t.thumb ? `<img src="${t.thumb}" alt="">` : '<div class="music-thumb-placeholder"><i class="fas fa-music"></i></div>'}</div>
+            <div class="music-info"><div class="music-title">${t.title}</div><div class="music-genre">${t.genre||''}</div></div>
             <i class="fas fa-${t.link ? 'external-link-alt' : 'music'} music-play"></i>
-        </div>
-    `).join('');
+        </div>`).join('');
 }
 
 function renderMusicAdmin() {
@@ -937,13 +678,9 @@ function renderMusicAdmin() {
             <div style="width:36px;height:36px;border-radius:8px;overflow:hidden;background:#1a1a1a;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
                 ${t.thumb ? `<img src="${t.thumb}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="fas fa-music" style="color:var(--accent);font-size:14px;"></i>'}
             </div>
-            <div style="flex:1;min-width:0;">
-                <div style="font-size:14px;font-weight:600;">${t.title}</div>
-                <div style="font-size:12px;color:var(--muted);">${t.genre}</div>
-            </div>
+            <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;">${t.title}</div><div style="font-size:12px;color:var(--muted);">${t.genre}</div></div>
             <button onclick="deleteMusic('${t.id}')" style="background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.3);color:#ff6b6b;padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;">Sil</button>
-        </div>
-    `).join('');
+        </div>`).join('');
 }
 
 async function addMusic() {
@@ -954,10 +691,10 @@ async function addMusic() {
     if (!title) return;
     const { collection, addDoc } = firestore;
     let thumb = '';
-    const thumbFile = document.getElementById('musicThumbInput').files[0];
-    if (thumbFile) thumb = await fileToBase64(thumbFile);
-    const docRef = await addDoc(collection(db, 'music'), { title, genre, link, thumb, createdAt: Date.now() });
-    cache.music.push({ id: docRef.id, title, genre, link, thumb });
+    const tf = document.getElementById('musicThumbInput').files[0];
+    if (tf) thumb = await fileToBase64(tf);
+    const ref = await addDoc(collection(db, 'music'), { title, genre, link, thumb, createdAt: Date.now() });
+    cache.music.push({ id: ref.id, title, genre, link, thumb });
     renderMusic(); renderMusicAdmin();
     document.getElementById('musicTitleInput').value = '';
     document.getElementById('musicGenreInput').value = '';
@@ -975,15 +712,14 @@ async function deleteMusic(id) {
     showToast('🗑 Silindi');
 }
 
-// ========== HERO SAVE ==========
+// ===== HERO SAVE =====
 async function saveHero() {
     if (!db) { showToast('⚠ Firebase bağlı değil'); return; }
     const { doc, setDoc } = firestore;
-    const tag = document.getElementById('heroTagInput').value || cache.hero.heroTag;
-    const sub = document.getElementById('heroSubInput').value || cache.hero.heroSubtitle;
-    const yr = document.getElementById('statYearInput').value || cache.hero.statYear;
-    const al = document.getElementById('statAlbumInput').value || cache.hero.statAlbum;
-    cache.hero = { ...cache.hero, heroTag: tag, heroSubtitle: sub, statYear: yr, statAlbum: al };
+    cache.hero.heroTag = document.getElementById('heroTagInput').value || cache.hero.heroTag;
+    cache.hero.heroSubtitle = document.getElementById('heroSubInput').value || cache.hero.heroSubtitle;
+    cache.hero.statYear = document.getElementById('statYearInput').value || cache.hero.statYear;
+    cache.hero.statAlbum = document.getElementById('statAlbumInput').value || cache.hero.statAlbum;
     await setDoc(doc(db, 'site', 'hero'), cache.hero);
     renderAll();
     showToast('✅ Kaydedildi!');
@@ -996,24 +732,17 @@ async function handleHeroBg(input) {
     document.getElementById('heroBg').style.backgroundImage = `url('${base64}')`;
     document.getElementById('heroBgPreviewImg').src = base64;
     document.getElementById('heroBgPreview').style.display = 'block';
-    if (db) {
-        const { doc, setDoc } = firestore;
-        await setDoc(doc(db, 'site', 'hero'), cache.hero);
-        showToast('✅ Arka plan kaydedildi!');
-    }
+    if (db) { const { doc, setDoc } = firestore; await setDoc(doc(db, 'site', 'hero'), cache.hero); showToast('✅ Arka plan kaydedildi!'); }
 }
 
 function removeHeroBg() {
     cache.hero.heroBg = '';
     document.getElementById('heroBg').style.backgroundImage = '';
     document.getElementById('heroBgPreview').style.display = 'none';
-    if (db) {
-        const { doc, setDoc } = firestore;
-        setDoc(doc(db, 'site', 'hero'), cache.hero);
-    }
+    if (db) { const { doc, setDoc } = firestore; setDoc(doc(db, 'site', 'hero'), cache.hero); }
 }
 
-// ========== ADMIN ==========
+// ===== ADMIN =====
 function openAdmin() {
     document.getElementById('adminOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -1021,21 +750,14 @@ function openAdmin() {
     document.getElementById('heroSubInput').value = cache.hero.heroSubtitle;
     document.getElementById('statYearInput').value = cache.hero.statYear;
     document.getElementById('statAlbumInput').value = cache.hero.statAlbum;
-    if (cache.hero.heroBg) {
-        document.getElementById('heroBgPreviewImg').src = cache.hero.heroBg;
-        document.getElementById('heroBgPreview').style.display = 'block';
-    }
+    if (cache.hero.heroBg) { document.getElementById('heroBgPreviewImg').src = cache.hero.heroBg; document.getElementById('heroBgPreview').style.display = 'block'; }
     renderGalleryAdmin(); renderBooksAdmin(); renderMusicAdmin();
 }
 
-function closeAdmin() {
-    document.getElementById('adminOverlay').classList.remove('open');
-    document.body.style.overflow = '';
-}
+function closeAdmin() { document.getElementById('adminOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 
 function checkPass() {
-    const val = document.getElementById('adminPass').value;
-    if (val === ADMIN_PASSWORD) {
+    if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
         document.getElementById('adminLogin').style.display = 'none';
         document.getElementById('adminContent').style.display = 'block';
         document.getElementById('loginError').style.display = 'none';
@@ -1052,70 +774,38 @@ function switchTab(name, btn) {
     btn.classList.add('active');
 }
 
-document.getElementById('adminOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeAdmin();
-});
+document.getElementById('adminOverlay').addEventListener('click', function(e) { if (e.target === this) closeAdmin(); });
 
-// ========== UTILS ==========
+// ===== UTILS =====
 function fileToBase64(file) {
-    return new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = e => res(e.target.result);
-        r.onerror = rej;
-        r.readAsDataURL(file);
-    });
+    return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = rej; r.readAsDataURL(file); });
 }
 
-function openLightbox(src) {
-    document.getElementById('lightboxImg').src = src;
-    document.getElementById('lightbox').classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
-function closeLightbox() {
-    document.getElementById('lightbox').classList.remove('open');
-    document.body.style.overflow = '';
-}
-document.getElementById('lightbox').addEventListener('click', function(e) {
-    if (e.target === this) closeLightbox();
-});
+function openLightbox(src) { document.getElementById('lightboxImg').src = src; document.getElementById('lightbox').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow = ''; }
+document.getElementById('lightbox').addEventListener('click', function(e) { if (e.target === this) closeLightbox(); });
 
-function toggleMenu() {
-    document.getElementById('navLinks').classList.toggle('open');
-}
+function toggleMenu() { document.getElementById('navLinks').classList.toggle('open'); }
 
 function showToast(msg) {
     const t = document.createElement('div');
-    t.style.cssText = `
-        position:fixed;bottom:70px;right:20px;z-index:9999;
-        background:rgba(200,169,110,0.15);border:1px solid var(--accent);
-        color:var(--accent);padding:10px 18px;border-radius:10px;
-        font-size:13px;font-family:'Outfit',sans-serif;font-weight:600;
-        backdrop-filter:blur(10px);animation:fadeInOut 2.5s ease forwards;
-    `;
+    t.style.cssText = 'position:fixed;bottom:70px;right:20px;z-index:9999;background:rgba(200,169,110,0.15);border:1px solid var(--accent);color:var(--accent);padding:10px 18px;border-radius:10px;font-size:13px;font-family:Outfit,sans-serif;font-weight:600;backdrop-filter:blur(10px);animation:fadeInOut 2.5s ease forwards;';
     t.textContent = msg;
-    const style = document.createElement('style');
-    style.textContent = `@keyframes fadeInOut{0%{opacity:0;transform:translateY(10px)}15%{opacity:1;transform:translateY(0)}80%{opacity:1}100%{opacity:0}}`;
-    document.head.appendChild(style);
+    const s = document.createElement('style');
+    s.textContent = '@keyframes fadeInOut{0%{opacity:0;transform:translateY(10px)}15%{opacity:1;transform:translateY(0)}80%{opacity:1}100%{opacity:0}}';
+    document.head.appendChild(s);
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 2600);
 }
 
-// ========== KAR EFEKTİ ==========
-(function createSnow() {
+// ===== KAR =====
+(function() {
     const snow = document.getElementById('snow');
     for (let i = 0; i < 60; i++) {
         const f = document.createElement('div');
         f.className = 'flake';
-        const size = Math.random() * 10 + 4;
-        const chars = ['❄', '❅', '❆', '·', '*'];
-        f.textContent = chars[Math.floor(Math.random() * chars.length)];
-        f.style.cssText = `
-            left: ${Math.random() * 100}%;
-            font-size: ${size}px;
-            animation-delay: -${Math.random() * 15}s;
-            animation-duration: ${Math.random() * 10 + 8}s;
-            opacity: ${Math.random() * 0.5 + 0.1};
-        `;
+        f.textContent = ['❄','❅','❆','·','*'][Math.floor(Math.random()*5)];
+        f.style.cssText = `left:${Math.random()*100}%;font-size:${Math.random()*10+4}px;animation-delay:-${Math.random()*15}s;animation-duration:${Math.random()*10+8}s;opacity:${Math.random()*0.5+0.1};`;
         snow.appendChild(f);
     }
 })();
